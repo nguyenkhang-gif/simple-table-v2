@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+import { assertNever, cn } from '@/lib/utils'
 import type { FilterFieldDecl } from '../types'
 import { DebouncedInput } from './DebouncedInput'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -93,10 +93,6 @@ function renderControl(props: ControlProps) {
     case 'component':
       return <CustomFilter {...props} />
     default:
-      return assertNever(props.field.variant)
+      return assertNever(props.field.variant, 'filter variant')
   }
-}
-
-function assertNever(variant: never): never {
-  throw new Error(`No renderer for filter variant: ${variant}`)
 }
