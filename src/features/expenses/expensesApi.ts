@@ -3,7 +3,11 @@ import type { Expense, ExpenseResponse, FetchExpensesProps } from "./types";
 function buildQueryString(params: object = {}): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== null && value !== "") {
+    if (value === undefined || value === null || value === "") continue;
+    // Mảng phải append từng phần tử — String(["a","b"]) sẽ ra "a,b", mất cấu trúc
+    if (Array.isArray(value)) {
+      for (const item of value) search.append(key, String(item));
+    } else {
       search.set(key, String(value));
     }
   }
