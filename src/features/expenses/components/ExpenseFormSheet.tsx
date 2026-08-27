@@ -111,7 +111,13 @@ export function ExpenseFormSheet({ record, close }: ExpenseFormSheetProps) {
 
   return (
     <Sheet open onOpenChange={(open) => !open && close(false)}>
-      <SheetContent className="flex flex-col sm:max-w-lg">
+      {/*
+        Phải khai kèm `data-[side=right]:` cho khớp modifier của class gốc trong
+        `sheet.tsx`. Viết trần (`w-full`, `sm:max-w-lg`) thì tailwind-merge coi
+        là key khác nên giữ cả hai, rồi class gốc thắng vì có thêm attribute
+        selector (`…[data-side=right]`) — độ đặc hiệu cao hơn.
+      */}
+      <SheetContent className="flex flex-col data-[side=right]:w-full data-[side=right]:sm:max-w-lg">
         <SheetHeader>
           <SheetTitle>{isEdit ? "Edit expense" : "New expense"}</SheetTitle>
           <SheetDescription>
