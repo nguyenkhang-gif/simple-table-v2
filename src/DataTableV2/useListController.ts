@@ -2,18 +2,20 @@ import { useCallback, useMemo, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { classifyColumns } from "./classifyColumns";
 import { buildQueryParams } from "./buildQueryParams";
+import { buildInitialFilterValues } from "./utils";
 import type { ActiveAction, ListControllerConfig, SortState } from "./types";
 
 export function useListController<T extends { id: string }, A extends string = never>(
   config: ListControllerConfig<T, A>,
 ) {
-  const { columns, fetch, resourceName, initialLimit = 10, externalParams } = config;
+  const { columns, fetch, resourceName, filters, initialLimit = 10, externalParams } = config;
 
   const classified = useMemo(() => classifyColumns(columns), [columns]);
+  const initialFilterValues = useMemo(() => buildInitialFilterValues(filters), [filters]);
 
   const [page, setPage] = useState(1);
   const [limit] = useState(initialLimit);
-  const [filterValues, setFilterValues] = useState<Record<string, unknown>>({});
+  const [filterValues, setFilterValues] = useState<Record<string, unknown>>(initialFilterValues);
   const [sorting, setSorting] = useState<SortState | undefined>(undefined);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [activeAction, setActiveAction] = useState<ActiveAction<T, A> | undefined>(undefined);
@@ -23,13 +25,14 @@ export function useListController<T extends { id: string }, A extends string = n
     () =>
       buildQueryParams({
         classified,
+        filters,
         filterValues,
         sorting,
         page,
         limit,
         externalParams,
       }),
-    [classified, filterValues, sorting, page, limit, externalParams],
+    [classified, filters, filterValues, sorting, page, limit, externalParams],
   );
 
   const query = useQuery({
@@ -39,36 +42,23 @@ export function useListController<T extends { id: string }, A extends string = n
   });
   const { refetch } = query;
 
-  // Lọc + sort client-side — cột filterable/sortable: "client" không đi qua queryParams (§4)
+  // Sort client-side — cột sortable: "client" không đi qua queryParams (§4)
   const processedRows = useMemo(() => {
-    let rows = query.data?.data ?? [];
+    const rows = query.data?.data ?? [];
+    if (!sorting) return rows;
 
-    if (classified.clientFilterColumns.length > 0) {
-      rows = rows.filter((row) =>
-        classified.clientFilterColumns.every((col) => {
-          const filterValue = filterValues[col.key];
-          if (filterValue === undefined || filterValue === "") return true;
-          return String(row[col.key]) === String(filterValue);
-        }),
-      );
-    }
+    const isClientSort = classified.clientSortColumns.some((c) => c.key === sorting.key);
+    if (!isClientSort) return rows;
 
-    if (sorting) {
-      const isClientSort = classified.clientSortColumns.some((c) => c.key === sorting.key);
-      if (isClientSort) {
-        const { key, direction } = sorting;
-        rows = [...rows].sort((a, b) => {
-          const av = a[key as keyof T];
-          const bv = b[key as keyof T];
-          if (av === bv) return 0;
-          const cmp = av > bv ? 1 : -1;
-          return direction === "asc" ? cmp : -cmp;
-        });
-      }
-    }
-
-    return rows;
-  }, [query.data, classified.clientFilterColumns, classified.clientSortColumns, filterValues, sorting]);
+    const { key, direction } = sorting;
+    return [...rows].sort((a, b) => {
+      const av = a[key as keyof T];
+      const bv = b[key as keyof T];
+      if (av === bv) return 0;
+      const cmp = av > bv ? 1 : -1;
+      return direction === "asc" ? cmp : -cmp;
+    });
+  }, [query.data, classified.clientSortColumns, sorting]);
 
   // Reset state phái sinh tại nơi gây thay đổi, không suy luận ngược (§8.2, §10)
   const updateFilterValue = useCallback((key: string, value: unknown) => {
@@ -76,6 +66,12 @@ export function useListController<T extends { id: string }, A extends string = n
     setPage(1);
     setSelectedIds([]);
   }, []);
+
+  const clearFilters = useCallback(() => {
+    setFilterValues(initialFilterValues);
+    setPage(1);
+    setSelectedIds([]);
+  }, [initialFilterValues]);
 
   const updateSorting = useCallback((next: SortState | undefined) => {
     setSorting(next);
@@ -115,7 +111,9 @@ export function useListController<T extends { id: string }, A extends string = n
     page,
     setPage,
     filterValues,
+    initialFilterValues,
     updateFilterValue,
+    clearFilters,
     sorting,
     updateSorting,
     selectedIds,

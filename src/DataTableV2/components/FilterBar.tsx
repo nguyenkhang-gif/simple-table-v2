@@ -1,56 +1,49 @@
-import type { ColumnDef } from '../types'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { isEqual } from 'lodash'
+import { X } from 'lucide-react'
+import type { FilterFieldDecl } from '../types'
+import { FilterField } from './FilterField'
+import { Button } from '@/components/ui/button'
 
-export interface FilterBarProps<T> {
-  columns: ColumnDef<T>[]
+export interface FilterBarProps {
+  filters?: FilterFieldDecl[]
   filterValues: Record<string, unknown>
+  initialFilterValues: Record<string, unknown>
   onFilterChange: (key: string, value: unknown) => void
+  onClear: () => void
 }
 
-const ALL_VALUE = '__all__'
+export function FilterBar({
+  filters,
+  filterValues,
+  initialFilterValues,
+  onFilterChange,
+  onClear,
+}: FilterBarProps) {
+  if (!filters || filters.length === 0) return null
 
-export function FilterBar<T>({ columns, filterValues, onFilterChange }: FilterBarProps<T>) {
-  const filterableColumns = columns.filter((col) => col.filterable)
-  if (filterableColumns.length === 0) return null
+  // Cascading — field tự khai điều kiện ẩn theo giá trị của field khác
+  const visibleFields = filters.filter((field) => !field.hidden?.(filterValues))
+  if (visibleFields.length === 0) return null
+
+  const isDirty = !isEqual(filterValues, initialFilterValues)
 
   return (
-    <div className="mb-3 flex flex-wrap gap-2">
-      {filterableColumns.map((col) => {
-        const value = filterValues[col.key]
+    <div className="mb-3 flex flex-wrap items-end gap-2">
+      {visibleFields.map((field) => (
+        <FilterField
+          key={field.key}
+          field={field}
+          value={filterValues[field.key]}
+          onChange={(value) => onFilterChange(field.key, value)}
+        />
+      ))}
 
-        if (col.filterVariant === 'select') {
-          return (
-            <Select
-              key={col.key}
-              value={(value as string) ?? ALL_VALUE}
-              onValueChange={(v) => onFilterChange(col.key, v === ALL_VALUE ? undefined : v)}
-            >
-              <SelectTrigger size="default" className="w-40">
-                <SelectValue placeholder={col.label} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ALL_VALUE}>{col.label} — Tất cả</SelectItem>
-                {col.filterOptions?.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )
-        }
-
-        return (
-          <Input
-            key={col.key}
-            value={(value as string) ?? ''}
-            onChange={(e) => onFilterChange(col.key, e.target.value || undefined)}
-            placeholder={`Lọc ${col.label.toLowerCase()}...`}
-            className="h-8 w-48"
-          />
-        )
-      })}
+      {isDirty && (
+        <Button variant="destructive" onClick={onClear}>
+          <X />
+          Clear filters
+        </Button>
+      )}
     </div>
   )
 }

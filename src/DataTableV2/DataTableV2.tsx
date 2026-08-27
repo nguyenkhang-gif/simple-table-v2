@@ -1,7 +1,8 @@
-import { useEffect, type ReactNode } from 'react'
+import { useEffect } from 'react'
 import { pick } from 'lodash'
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { useListController } from './useListController'
+import { defaultCellValue } from './utils'
 import type { ColumnDef, DataTableV2Props } from './types'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,23 +16,19 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { FilterBar } from './components/FilterBar'
 
-function defaultCellValue<T>(row: T, col: ColumnDef<T>): ReactNode {
-  const value = row[col.key]
-  return value === null || value === undefined ? '' : String(value)
-}
-
 export function DataTableV2<T extends { id: string }, A extends string = never>(
   props: DataTableV2Props<T, A>,
 ) {
   const {
     columns,
-    emptyMessage = 'Không có dữ liệu',
+    emptyMessage = 'No data',
     renderLoading,
     renderError,
     renderEmpty,
     actions,
     rowActions,
     handlers,
+    filters,
     fetch,
     resourceName,
     initialLimit = 10,
@@ -45,6 +42,7 @@ export function DataTableV2<T extends { id: string }, A extends string = never>(
     'actions',
     'rowActions',
     'handlers',
+    'filters',
     'fetch',
     'resourceName',
     'initialLimit',
@@ -55,6 +53,7 @@ export function DataTableV2<T extends { id: string }, A extends string = never>(
     columns,
     fetch,
     resourceName,
+    filters,
     initialLimit,
     externalParams,
   })
@@ -107,7 +106,7 @@ export function DataTableV2<T extends { id: string }, A extends string = never>(
     return renderLoading ? (
       <>{renderLoading()}</>
     ) : (
-      <div className="p-4 text-center text-muted-foreground">Đang tải...</div>
+      <div className="p-4 text-center text-muted-foreground">Loading...</div>
     )
   }
 
@@ -116,9 +115,9 @@ export function DataTableV2<T extends { id: string }, A extends string = never>(
       <>{renderError(ctrl.error, ctrl.refetch)}</>
     ) : (
       <div className="p-4 text-center text-destructive">
-        Lỗi: {String(ctrl.error)}{' '}
+        Error: {String(ctrl.error)}{' '}
         <Button variant="link" className="h-auto p-0" onClick={() => ctrl.refetch()}>
-          Thử lại
+          Retry
         </Button>
       </div>
     )
@@ -136,7 +135,13 @@ export function DataTableV2<T extends { id: string }, A extends string = never>(
         </div>
       )}
 
-      <FilterBar columns={columns} filterValues={ctrl.filterValues} onFilterChange={ctrl.updateFilterValue} />
+      <FilterBar
+        filters={filters}
+        filterValues={ctrl.filterValues}
+        initialFilterValues={ctrl.initialFilterValues}
+        onFilterChange={ctrl.updateFilterValue}
+        onClear={ctrl.clearFilters}
+      />
 
       <div style={{ opacity: ctrl.isFetching ? 0.5 : 1 }}>
         <Table>
@@ -165,7 +170,7 @@ export function DataTableV2<T extends { id: string }, A extends string = never>(
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        Sắp xếp ({col.sortable === 'server' ? 'phía server' : 'tại chỗ'})
+                        Sort ({col.sortable === 'server' ? 'server-side' : 'client-side'})
                       </TooltipContent>
                     </Tooltip>
                   ) : (
@@ -249,7 +254,7 @@ export function DataTableV2<T extends { id: string }, A extends string = never>(
             ← Prev
           </Button>
           <span className="text-muted-foreground">
-            Trang {ctrl.meta.page}/{ctrl.meta.totalPages} — tổng {ctrl.meta.total} bản ghi
+            Page {ctrl.meta.page}/{ctrl.meta.totalPages} — {ctrl.meta.total} records total
           </span>
           <Button
             variant="outline"

@@ -1,17 +1,19 @@
 import type { BuildQueryParamsInput, QueryParams } from "./types";
+import { isEmptyValue } from "./utils";
 
 /**
  * Nguồn sự thật duy nhất (§5) — mọi thứ ảnh hưởng tới request hội tụ ở đây.
  * Hàm thuần, tách khỏi useMemo để test được không cần render (§5, §11 bước 2).
  */
 export function buildQueryParams<T>(input: BuildQueryParamsInput<T>): QueryParams {
-  const { classified, filterValues, sorting, page, limit, externalParams } = input;
+  const { classified, filters, filterValues, sorting, page, limit, externalParams } = input;
 
-  const serverFilterKeys = new Set<string>(classified.serverFilterColumns.map((c) => c.key));
-  const serverFilters: Record<string, unknown> = {};
+  // Filter khai độc lập — key gửi thẳng lên fetch, không cần là cột nào
+  const filterKeys = new Set<string>(filters?.map((f) => f.key) ?? []);
+  const activeFilters: Record<string, unknown> = {};
   for (const key of Object.keys(filterValues)) {
-    if (serverFilterKeys.has(key) && filterValues[key] !== undefined) {
-      serverFilters[key] = filterValues[key];
+    if (filterKeys.has(key) && !isEmptyValue(filterValues[key])) {
+      activeFilters[key] = filterValues[key];
     }
   }
 
@@ -23,7 +25,7 @@ export function buildQueryParams<T>(input: BuildQueryParamsInput<T>): QueryParam
 
   return {
     ...externalParams,
-    ...serverFilters,
+    ...activeFilters,
     ...sort,
     page,
     limit,

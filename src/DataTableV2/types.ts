@@ -1,8 +1,6 @@
 import type { ReactNode } from "react";
 
-export type FilterMode = "server" | "client" | false;
 export type SortMode = "server" | "client" | false;
-export type FilterVariant = "text" | "select" | "date";
 
 export interface CellContext<T> {
   row: T;
@@ -10,18 +8,38 @@ export interface CellContext<T> {
 }
 
 /**
- * Metadata mô tả một cột — đi cùng cột (§4), container tự phân loại
- * (filterable/sortable) mà không cần màn hình khai báo ở chỗ khác.
+ * Metadata mô tả một cột — đi cùng cột (§4). Cột chỉ lo hiển thị + sort;
+ * filter khai riêng ở `FilterFieldDecl` để lọc được cả field không phải cột.
  */
 export interface ColumnDef<T> {
   key: keyof T & string;
   label: string;
-  filterable?: FilterMode;
   sortable?: SortMode;
-  filterVariant?: FilterVariant;
-  filterOptions?: { label: string; value: string }[];
   /** Render prop — container chỉ hiển thị, không cần hiểu nội dung ô (§3) */
   render?: (ctx: CellContext<T>) => ReactNode;
+}
+
+// --- Filter khai báo độc lập, tách khỏi columns ---
+
+export type FilterVariant = "text" | "select" | "component";
+
+export interface FilterFieldDecl {
+  /** Tên param gửi thẳng lên fetch — không cần trùng key nào trong columns */
+  key: string;
+  /** Hiển thị phía trên ô nhập */
+  label: string;
+  variant: FilterVariant;
+  /** Chữ gợi ý trong ô — không khai thì suy từ `label` */
+  placeholder?: string;
+  /** Class Tailwind quy định bề rộng, vd "w-64". Mặc định "w-48" */
+  width?: string;
+  /** Dùng khi variant: "select" */
+  options?: { label: string; value: string }[];
+  defaultValue?: unknown;
+  /** Cascading — ẩn field này tuỳ theo giá trị của field khác */
+  hidden?: (values: Record<string, unknown>) => boolean;
+  /** Dùng khi variant: "component" — UI hoàn toàn tuỳ biến (§3) */
+  render?: (ctx: { value: unknown; onChange: (value: unknown) => void }) => ReactNode;
 }
 
 export interface QueryParams extends Record<string, unknown> {
@@ -67,8 +85,6 @@ export interface ActiveAction<T, A extends string> {
 
 export interface ClassifiedColumns<T> {
   all: ColumnDef<T>[];
-  serverFilterColumns: ColumnDef<T>[];
-  clientFilterColumns: ColumnDef<T>[];
   serverSortColumns: ColumnDef<T>[];
   clientSortColumns: ColumnDef<T>[];
 }
@@ -82,6 +98,7 @@ export interface SortState {
 
 export interface BuildQueryParamsInput<T> {
   classified: ClassifiedColumns<T>;
+  filters?: FilterFieldDecl[];
   filterValues: Record<string, unknown>;
   sorting: SortState | undefined;
   page: number;
@@ -100,6 +117,7 @@ export interface ListControllerConfig<T, A extends string = never> {
   columns: ColumnDef<T>[];
   fetch: (params: QueryParams) => Promise<ListResponse<T> | undefined>;
   resourceName: string;
+  filters?: FilterFieldDecl[];
   initialLimit?: number;
   externalParams?: Record<string, unknown>;
   actions?: ActionDecl<A>[];
