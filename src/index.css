@@ -132,4 +132,9 @@ body {
   html {
     @apply font-sans;
   }
+  /* Tailwind v4 đặt cursor mặc định của <button> là `default`; trả lại pointer */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    @apply cursor-pointer;
+  }
 }
