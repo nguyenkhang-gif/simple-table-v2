@@ -29,7 +29,7 @@ function App() {
   return (
     <div className="mx-auto max-w-3xl p-8 font-sans text-gray-900 dark:text-gray-100">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Quản lý chi tiêu</h1>
+        <h1 className="text-xl font-semibold">Expense tracker</h1>
         <button
           onClick={toggle}
           className="rounded-md border border-gray-300 px-3 py-1 text-sm hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800"
@@ -41,13 +41,13 @@ function App() {
       <AddExpenseForm />
 
       <label className="mb-4 block text-left text-sm">
-        Danh mục:{" "}
+        Category:{" "}
         <select
           value={category ?? ""}
           onChange={(e) => updateCategory(e.target.value ? (e.target.value as never) : undefined)}
           className="rounded-md border border-gray-300 px-2 py-1 dark:border-gray-600 dark:bg-gray-800"
         >
-          <option value="">Tất cả</option>
+          <option value="">All</option>
           {CATEGORY_OPTIONS.map((c) => (
             <option key={c} value={c}>
               {c}
@@ -56,7 +56,7 @@ function App() {
         </select>
       </label>
 
-      {error && <p className="mb-2 text-red-600 dark:text-red-400">Lỗi: {String(error)}</p>}
+      {error && <p className="mb-2 text-red-600 dark:text-red-400">Error: {String(error)}</p>}
 
       <table
         className="w-full border-collapse text-left text-sm transition-opacity"
@@ -65,10 +65,10 @@ function App() {
         <thead>
           <tr className="bg-gray-100 dark:bg-gray-800">
             <th className="border-b border-gray-300 px-3 py-2 dark:border-gray-700">ID</th>
-            <th className="border-b border-gray-300 px-3 py-2 dark:border-gray-700">Danh mục</th>
-            <th className="border-b border-gray-300 px-3 py-2 dark:border-gray-700">Ghi chú</th>
-            <th className="border-b border-gray-300 px-3 py-2 dark:border-gray-700">Số tiền</th>
-            <th className="border-b border-gray-300 px-3 py-2 dark:border-gray-700">Ngày</th>
+            <th className="border-b border-gray-300 px-3 py-2 dark:border-gray-700">Category</th>
+            <th className="border-b border-gray-300 px-3 py-2 dark:border-gray-700">Note</th>
+            <th className="border-b border-gray-300 px-3 py-2 dark:border-gray-700">Amount</th>
+            <th className="border-b border-gray-300 px-3 py-2 dark:border-gray-700">Date</th>
             <th className="border-b border-gray-300 px-3 py-2 dark:border-gray-700"></th>
           </tr>
         </thead>
@@ -76,13 +76,13 @@ function App() {
           {isLoading ? (
             <tr>
               <td colSpan={6} className="px-3 py-4 text-center">
-                Đang tải...
+                Loading...
               </td>
             </tr>
           ) : rows.length === 0 ? (
             <tr>
               <td colSpan={6} className="px-3 py-4 text-center">
-                Không có dữ liệu
+                No data
               </td>
             </tr>
           ) : (
@@ -109,7 +109,7 @@ function App() {
                     disabled={deleteExpense.isPending}
                     className="text-red-600 hover:underline disabled:opacity-40 dark:text-red-400"
                   >
-                    Xoá
+                    Delete
                   </button>
                 </td>
               </tr>
@@ -128,7 +128,7 @@ function App() {
             ← Prev
           </button>
           <span>
-            Trang {meta.page}/{meta.totalPages} — tổng {meta.total} bản ghi
+            Page {meta.page}/{meta.totalPages} — {meta.total} records total
           </span>
           <button
             disabled={page >= meta.totalPages}

@@ -34,14 +34,14 @@ export function AddExpenseForm() {
       <input
         value={note}
         onChange={(e) => setNote(e.target.value)}
-        placeholder="Ghi chú"
+        placeholder="Note"
         className="rounded-md border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-800"
       />
       <input
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
         type="number"
-        placeholder="Số tiền"
+        placeholder="Amount"
         className="w-28 rounded-md border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-800"
       />
       <select
@@ -60,7 +60,7 @@ export function AddExpenseForm() {
         disabled={createExpense.isPending}
         className="rounded-md bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
       >
-        {createExpense.isPending ? "Đang thêm..." : "+ Thêm"}
+        {createExpense.isPending ? "Adding..." : "+ Add"}
       </button>
     </form>
   );

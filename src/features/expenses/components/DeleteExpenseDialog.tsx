@@ -21,21 +21,20 @@ export function DeleteExpenseDialog({ record, close }: DeleteExpenseDialogProps)
     <AlertDialog open onOpenChange={(open) => !open && close(false)}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Xoá chi tiêu?</AlertDialogTitle>
+          <AlertDialogTitle>Delete expense?</AlertDialogTitle>
           <AlertDialogDescription>
-            "{record?.note}" — {record?.amount.toLocaleString()}đ. Hành động này không thể hoàn
-            tác.
+            "{record?.note}" — {record?.amount.toLocaleString()}đ. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Huỷ</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={async () => {
               await deleteExpenseApi(record!.id);
               close(true);
             }}
           >
-            Xoá
+            Delete
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
