@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { FilterBar } from './components/FilterBar'
+import { Pagination } from './components/Pagination'
 
 export function DataTableV2<T extends { id: string }, A extends string = never>(
   props: DataTableV2Props<T, A>,
@@ -29,6 +30,7 @@ export function DataTableV2<T extends { id: string }, A extends string = never>(
     rowActions,
     handlers,
     filters,
+    pagination,
     fetch,
     resourceName,
     initialLimit = 10,
@@ -43,6 +45,7 @@ export function DataTableV2<T extends { id: string }, A extends string = never>(
     'rowActions',
     'handlers',
     'filters',
+    'pagination',
     'fetch',
     'resourceName',
     'initialLimit',
@@ -128,7 +131,14 @@ export function DataTableV2<T extends { id: string }, A extends string = never>(
       {actions && actions.length > 0 && (
         <div className="mb-2 flex gap-2">
           {actions.map((action) => (
-            <Button key={action.type} size="sm" onClick={() => ctrl.openAction(action.type)}>
+            <Button
+              key={action.type}
+              size="sm"
+              variant={action.variant}
+              className={action.className}
+              onClick={() => ctrl.openAction(action.type)}
+            >
+              {action.icon}
               {action.label ?? action.type}
             </Button>
           ))}
@@ -143,10 +153,13 @@ export function DataTableV2<T extends { id: string }, A extends string = never>(
         onClear={ctrl.clearFilters}
       />
 
-      <div style={{ opacity: ctrl.isFetching ? 0.5 : 1 }}>
+      <div
+        className="overflow-hidden rounded-md border"
+        style={{ opacity: ctrl.isFetching ? 0.5 : 1 }}
+      >
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="bg-muted/50">
               {columns.map((col) => (
                 <TableHead key={col.key}>
                   {col.sortable ? (
@@ -214,8 +227,9 @@ export function DataTableV2<T extends { id: string }, A extends string = never>(
 
                           const button = (
                             <Button
-                              variant="ghost"
+                              variant={action.variant ?? 'ghost'}
                               size={action.icon ? 'icon-sm' : 'sm'}
+                              className={action.className}
                               onClick={() => ctrl.openAction(action.type, row)}
                             >
                               {action.icon ?? action.label ?? action.type}
@@ -244,27 +258,15 @@ export function DataTableV2<T extends { id: string }, A extends string = never>(
       {activeHandler?.render && actionContext && <>{activeHandler.render(actionContext)}</>}
 
       {ctrl.meta && (
-        <div className="mt-4 flex items-center justify-center gap-4 text-sm">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={ctrl.page <= 1}
-            onClick={() => ctrl.setPage((p) => p - 1)}
-          >
-            ← Prev
-          </Button>
-          <span className="text-muted-foreground">
-            Page {ctrl.meta.page}/{ctrl.meta.totalPages} — {ctrl.meta.total} records total
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={ctrl.page >= ctrl.meta.totalPages}
-            onClick={() => ctrl.setPage((p) => p + 1)}
-          >
-            Next →
-          </Button>
-        </div>
+        <Pagination
+          page={ctrl.page}
+          limit={ctrl.limit}
+          totalPages={ctrl.meta.totalPages}
+          total={ctrl.meta.total}
+          onPageChange={ctrl.setPage}
+          onLimitChange={ctrl.updateLimit}
+          config={pagination}
+        />
       )}
     </TooltipProvider>
   )

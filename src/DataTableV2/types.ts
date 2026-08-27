@@ -47,6 +47,19 @@ export interface QueryParams extends Record<string, unknown> {
   limit: number;
 }
 
+// --- Phân trang (thuần trình bày, controller không cần biết) ---
+
+export type PaginationAlign = "left" | "center" | "right";
+
+export interface PaginationConfig {
+  /** Mặc định "center" */
+  align?: PaginationAlign;
+  /** Số dòng cho chọn. Truyền [] để ẩn ô chọn. Mặc định [5, 10, 20, 50] */
+  pageSizeOptions?: number[];
+  /** Hiện "Page x/y — n records total". Mặc định true */
+  showTotal?: boolean;
+}
+
 /**
  * Ngữ cảnh truyền cho action handler — đủ để xử lý mà không cần hỏi ngược (§6).
  */
@@ -64,6 +77,10 @@ export interface ActionDecl<A extends string> {
   type: A;
   label?: string;
   icon?: ReactNode;
+  /** Biến thể nút mặc định của container */
+  variant?: "default" | "outline" | "ghost" | "destructive" | "secondary" | "link";
+  /** Class bổ sung cho nút mặc định — gộp qua `cn()` nên ghi đè được class có sẵn */
+  className?: string;
   disabled?: (ctx: { selectedRows: unknown[] }) => boolean;
   /** Tự vẽ nút (icon-only, dropdown...) thay vì Button mặc định của container (§3) */
   render?: (ctx: { openAction: () => void }) => ReactNode;
@@ -129,6 +146,7 @@ export interface ListControllerConfig<T, A extends string = never> {
 
 export interface DataTableV2Props<T extends { id: string }, A extends string = never>
   extends ListControllerConfig<T, A> {
+  pagination?: PaginationConfig;
   emptyMessage?: string;
   renderLoading?: () => ReactNode;
   renderError?: (error: unknown, retry: () => void) => ReactNode;

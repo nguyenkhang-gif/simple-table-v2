@@ -14,7 +14,7 @@ export function useListController<T extends { id: string }, A extends string = n
   const initialFilterValues = useMemo(() => buildInitialFilterValues(filters), [filters]);
 
   const [page, setPage] = useState(1);
-  const [limit] = useState(initialLimit);
+  const [limit, setLimit] = useState(initialLimit);
   const [filterValues, setFilterValues] = useState<Record<string, unknown>>(initialFilterValues);
   const [sorting, setSorting] = useState<SortState | undefined>(undefined);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -78,6 +78,13 @@ export function useListController<T extends { id: string }, A extends string = n
     setPage(1);
   }, []);
 
+  // Đổi số dòng thì trang cũ vô nghĩa — reset ngay tại nguồn (§8.2)
+  const updateLimit = useCallback((next: number) => {
+    setLimit(next);
+    setPage(1);
+    setSelectedIds([]);
+  }, []);
+
   const toggleSelection = useCallback((id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
@@ -110,6 +117,8 @@ export function useListController<T extends { id: string }, A extends string = n
 
     page,
     setPage,
+    limit,
+    updateLimit,
     filterValues,
     initialFilterValues,
     updateFilterValue,
