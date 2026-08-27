@@ -45,6 +45,24 @@ export const createExpenseApi = async (
   }
 };
 
+export const updateExpenseApi = async (
+  id: string,
+  input: Omit<Expense, "id">,
+): Promise<Expense | undefined> => {
+  try {
+    const res = await fetch(`/api/expenses/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (!res.ok) throw new Error(`updateExpenseApi failed: ${res.status}`);
+    return await res.json();
+  } catch (error) {
+    console.error("updateExpenseApi failed", error);
+    return undefined;
+  }
+};
+
 export const deleteExpenseApi = async (id: string): Promise<boolean> => {
   try {
     const res = await fetch(`/api/expenses/${id}`, { method: "DELETE" });

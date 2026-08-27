@@ -31,6 +31,18 @@ app.post('/api/expenses', (req, res) => {
   res.status(201).json(created)
 })
 
+app.put('/api/expenses/:id', (req, res) => {
+  const index = expensesStore.findIndex((e) => e.id === req.params.id)
+  if (index === -1) {
+    res.status(404).json({ message: 'Not found' })
+    return
+  }
+  const { category, amount, note, date } = req.body as Omit<Expense, 'id'>
+  const updated: Expense = { id: req.params.id, category, amount, note, date }
+  expensesStore[index] = updated
+  res.json(updated)
+})
+
 app.delete('/api/expenses/:id', (req, res) => {
   const index = expensesStore.findIndex((e) => e.id === req.params.id)
   if (index === -1) {
