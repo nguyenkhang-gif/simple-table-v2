@@ -11,11 +11,11 @@ export interface Expense {
 const CATEGORIES: ExpenseCategory[] = ['food', 'transport', 'shopping', 'bills', 'entertainment']
 
 const NOTES: Record<ExpenseCategory, string[]> = {
-  food: ['Bún bò', 'Cà phê', 'Ăn trưa văn phòng', 'Trà sữa'],
-  transport: ['Đổ xăng', 'Grab', 'Vé xe bus'],
-  shopping: ['Quần áo', 'Đồ điện tử', 'Sách'],
-  bills: ['Tiền điện', 'Tiền nước', 'Internet'],
-  entertainment: ['Xem phim', 'Game', 'Spotify'],
+  food: ['Beef noodles', 'Coffee', 'Office lunch', 'Milk tea'],
+  transport: ['Fuel', 'Ride hailing', 'Bus ticket'],
+  shopping: ['Clothing', 'Electronics', 'Books'],
+  bills: ['Electricity', 'Water', 'Internet'],
+  entertainment: ['Cinema', 'Games', 'Spotify'],
 }
 
 function randomItem<T>(arr: T[]): T {
