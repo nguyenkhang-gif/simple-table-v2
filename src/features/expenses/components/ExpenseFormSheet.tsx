@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useMemo, useState } from "react";
 import {
   Sheet,
   SheetClose,
@@ -9,25 +9,21 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { FormV2 } from "@/FormV2/FormV2";
+import type { FormSectionDecl } from "@/FormV2/types";
 import { createExpenseApi, updateExpenseApi } from "../expensesApi";
 import type { Expense, ExpenseCategory } from "../types";
 
-const CATEGORY_OPTIONS: ExpenseCategory[] = [
-  "food",
-  "transport",
-  "shopping",
-  "bills",
-  "entertainment",
-];
+/** Giá trị form — `amount` là số, `id` không nằm trong form */
+interface ExpenseFormValues {
+  note: string;
+  amount: number;
+  category: ExpenseCategory;
+  date: string;
+}
+
+/** Nút submit nằm trong SheetFooter, ngoài <form> — nối lại bằng thuộc tính `form` */
+const FORM_ID = "expense-form";
 
 export interface ExpenseFormSheetProps {
   /** Có record là sửa, không có là tạo mới */
@@ -37,22 +33,77 @@ export interface ExpenseFormSheetProps {
 
 export function ExpenseFormSheet({ record, close }: ExpenseFormSheetProps) {
   const isEdit = Boolean(record);
-
-  const [note, setNote] = useState(record?.note ?? "");
-  const [amount, setAmount] = useState(record ? String(record.amount) : "");
-  const [category, setCategory] = useState<ExpenseCategory>(record?.category ?? "food");
-  const [date, setDate] = useState(record?.date ?? new Date().toISOString().slice(0, 10));
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!note || !amount) return;
+  const sections = useMemo<FormSectionDecl<ExpenseFormValues>[]>(
+    () => [
+      {
+        key: "general",
+        title: "General",
+        columns: 2,
+        fields: [
+          {
+            name: "note",
+            label: "Note",
+            variant: "text",
+            placeholder: "e.g. Coffee",
+            colSpan: 2,
+            rules: [
+              { required: true, message: "Note is required" },
+              { min: 3, message: "At least 3 characters" },
+            ],
+          },
+          {
+            name: "amount",
+            label: "Amount",
+            variant: "number",
+            placeholder: "50000",
+            colSpan: 1,
+            rules: [
+              { required: true, message: "Amount is required" },
+              { min: 1000, message: "Minimum 1,000đ" },
+            ],
+          },
+          {
+            name: "date",
+            label: "Date",
+            variant: "date",
+            colSpan: 1,
+            defaultValue: new Date().toISOString().slice(0, 10),
+            rules: [{ required: true }],
+          },
+        ],
+      },
+      {
+        key: "classification",
+        title: "Classification",
+        columns: 1,
+        fields: [
+          {
+            name: "category",
+            label: "Category",
+            variant: "select",
+            defaultValue: "food",
+            options: [
+              { label: "Food", value: "food" },
+              { label: "Transport", value: "transport" },
+              { label: "Shopping", value: "shopping" },
+              { label: "Bills", value: "bills" },
+              { label: "Entertainment", value: "entertainment" },
+            ],
+            rules: [{ required: true, message: "Pick a category" }],
+          },
+        ],
+      },
+    ],
+    [],
+  );
 
+  const handleSubmit = async (values: ExpenseFormValues) => {
     setSubmitting(true);
-    const payload = { note, amount: Number(amount), category, date };
     const result = record
-      ? await updateExpenseApi(record.id, payload)
-      : await createExpenseApi(payload);
+      ? await updateExpenseApi(record.id, values)
+      : await createExpenseApi(values);
     setSubmitting(false);
 
     if (result) close(true);
@@ -60,7 +111,7 @@ export function ExpenseFormSheet({ record, close }: ExpenseFormSheetProps) {
 
   return (
     <Sheet open onOpenChange={(open) => !open && close(false)}>
-      <SheetContent className="flex flex-col">
+      <SheetContent className="flex flex-col sm:max-w-lg">
         <SheetHeader>
           <SheetTitle>{isEdit ? "Edit expense" : "New expense"}</SheetTitle>
           <SheetDescription>
@@ -68,71 +119,26 @@ export function ExpenseFormSheet({ record, close }: ExpenseFormSheetProps) {
           </SheetDescription>
         </SheetHeader>
 
-        <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4 px-4">
-          <div className="grid gap-2">
-            <Label htmlFor="expense-note">Note</Label>
-            <Input
-              id="expense-note"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="e.g. Coffee"
-              required
-            />
-          </div>
+        <div className="flex-1 overflow-y-auto px-4">
+          <FormV2<ExpenseFormValues>
+            formId={FORM_ID}
+            hideFooter
+            sections={sections}
+            defaultValues={record}
+            onSubmit={handleSubmit}
+          />
+        </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="expense-amount">Amount</Label>
-            <Input
-              id="expense-amount"
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="e.g. 50000"
-              required
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="expense-category">Category</Label>
-            <Select
-              value={category}
-              onValueChange={(v) => setCategory(v as ExpenseCategory)}
-            >
-              <SelectTrigger id="expense-category" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORY_OPTIONS.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="expense-date">Date</Label>
-            <Input
-              id="expense-date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-            />
-          </div>
-
-          <SheetFooter className="mt-auto px-0">
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Saving..." : isEdit ? "Save changes" : "Create"}
+        <SheetFooter className="border-t">
+          <Button type="submit" form={FORM_ID} disabled={submitting}>
+            {submitting ? "Saving..." : isEdit ? "Save changes" : "Create"}
+          </Button>
+          <SheetClose asChild>
+            <Button type="button" variant="outline">
+              Cancel
             </Button>
-            <SheetClose asChild>
-              <Button type="button" variant="outline">
-                Cancel
-              </Button>
-            </SheetClose>
-          </SheetFooter>
-        </form>
+          </SheetClose>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );
