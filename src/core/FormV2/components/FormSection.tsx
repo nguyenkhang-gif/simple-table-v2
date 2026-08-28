@@ -47,7 +47,7 @@ export function FormSection({ section, errorCount }: FormSectionProps) {
         </div>
       </AccordionTrigger>
 
-      <AccordionContent className="p-4">
+      <AccordionContent className="p-4 h-auto">
         <div className={cn('grid gap-4', GRID_COLS[columns])}>
           {visibleFields.map((field) => {
             const isRequired = field.rules?.some((rule) => rule.required)
