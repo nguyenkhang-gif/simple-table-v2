@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { DataTableV2Demo } from "./DataTableV2Demo";
 import { FormV2Demo } from "./FormV2Demo";
+import { ViewV2Demo } from "./ViewV2Demo";
 import { useDarkMode } from "./hooks/useDarkMode";
 import { Button } from "@/components/ui/button";
 
-type Tab = "table" | "form";
+type Tab = "table" | "form" | "view";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "table", label: "DataTableV2 Demo" },
   { key: "form", label: "FormV2 Demo" },
+  { key: "view", label: "ViewV2 Demo" },
 ];
 
 export function Root() {
@@ -36,6 +38,7 @@ export function Root() {
 
       {tab === "table" && <DataTableV2Demo />}
       {tab === "form" && <FormV2Demo />}
+      {tab === "view" && <ViewV2Demo />}
     </div>
   );
 }
