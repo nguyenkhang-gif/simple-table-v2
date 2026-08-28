@@ -6,13 +6,6 @@ import type { ColumnDef, FilterFieldDecl } from "./types";
  * render (§11 bước 2).
  */
 
-/** Giá trị rỗng thì không đưa vào request — tránh đổi queryKey và fetch thừa */
-export function isEmptyValue(value: unknown): boolean {
-  if (value === undefined || value === null || value === "") return true;
-  if (Array.isArray(value) && value.length === 0) return true;
-  return false;
-}
-
 /** Hiển thị mặc định cho ô không khai `render` */
 export function defaultCellValue<T>(row: T, col: ColumnDef<T>): ReactNode {
   const value = row[col.key];

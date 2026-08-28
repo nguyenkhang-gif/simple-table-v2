@@ -12,3 +12,13 @@ export function cn(...inputs: ClassValue[]) {
 export function assertNever(value: never, context = "value"): never {
   throw new Error(`Unhandled ${context}: ${String(value)}`)
 }
+
+/**
+ * Rỗng theo nghĩa "không có gì để gửi đi / không có gì để hiển thị".
+ * Dùng chung giữa các container để một ô trống được hiểu giống nhau ở mọi nơi.
+ */
+export function isEmptyValue(value: unknown): boolean {
+  if (value === undefined || value === null || value === "") return true
+  if (Array.isArray(value) && value.length === 0) return true
+  return false
+}

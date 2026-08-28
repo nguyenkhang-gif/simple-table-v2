@@ -2,7 +2,7 @@ import { isEqual } from 'lodash'
 import { X } from 'lucide-react'
 import type { FilterFieldDecl } from '../types'
 import { FilterField } from './FilterField'
-import { isEmptyValue } from '../utils'
+import { isEmptyValue } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
 /**
