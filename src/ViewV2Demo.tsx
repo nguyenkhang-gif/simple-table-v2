@@ -10,9 +10,9 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
-import { ViewV2 } from './ViewV2/ViewV2'
-import { formatCurrency } from './ViewV2/formatters'
-import type { ViewSectionDecl } from './ViewV2/types'
+import { ViewV2 } from '@/core/ViewV2/ViewV2'
+import { formatCurrency } from '@/core/ViewV2/formatters'
+import type { ViewSectionDecl } from '@/core/ViewV2/types'
 
 interface ExpenseDetail {
   id: string

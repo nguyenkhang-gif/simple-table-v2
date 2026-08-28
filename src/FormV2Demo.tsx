@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { FormV2 } from './FormV2/FormV2'
-import type { FormSectionDecl } from './FormV2/types'
+import { FormV2 } from '@/core/FormV2/FormV2'
+import type { FormSectionDecl } from '@/core/FormV2/types'
 
 interface ExpenseForm {
   note: string
