@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { GridColumns } from "@/lib/grid";
 
 export type FormValues = Record<string, unknown>;
 
@@ -9,13 +10,6 @@ export type FormFieldVariant =
   | "select"
   | "textarea"
   | "component";
-
-/**
- * Giới hạn theo map class Tailwind viết sẵn trong `FormSection.tsx`.
- * Tailwind quét source như văn bản nên không nội suy được `grid-cols-${n}` —
- * dùng union để trạng thái không hợp lệ (vd 7 cột) không biểu diễn được (§9).
- */
-export type GridColumns = 1 | 2 | 3 | 4 | 6 | 12;
 
 /** Một object = một luật. Gõ sai key bị TS chặn nhờ excess property check */
 export interface FormRule {
@@ -81,3 +75,5 @@ export interface FormV2Props<T = FormValues> {
   /** Ẩn footer mặc định để cha tự đặt nút ở chỗ khác */
   hideFooter?: boolean;
 }
+
+export type { GridColumns };

@@ -11,30 +11,8 @@ import {
 } from '@/components/ui/form'
 import { FieldRenderer } from './FieldRenderer'
 import { toRhfRules } from '../rules'
-import type { FormSectionDecl, FormValues, GridColumns } from '../types'
-
-/**
- * Class Tailwind phải viết literal — Tailwind quét source như văn bản, không
- * chạy JS, nên `grid-cols-${n}` sẽ không sinh ra CSS. Cùng cách `ALIGN_CLASS`
- * trong `DataTableV2/components/Pagination.tsx` đang làm.
- */
-const GRID_COLS: Record<GridColumns, string> = {
-  1: 'grid-cols-1',
-  2: 'grid-cols-2',
-  3: 'grid-cols-3',
-  4: 'grid-cols-4',
-  6: 'grid-cols-6',
-  12: 'grid-cols-12',
-}
-
-const COL_SPAN: Record<GridColumns, string> = {
-  1: 'col-span-1',
-  2: 'col-span-2',
-  3: 'col-span-3',
-  4: 'col-span-4',
-  6: 'col-span-6',
-  12: 'col-span-12',
-}
+import { COL_SPAN, GRID_COLS } from '@/lib/grid'
+import type { FormSectionDecl, FormValues } from '../types'
 
 export interface FormSectionProps {
   section: FormSectionDecl<FormValues>
