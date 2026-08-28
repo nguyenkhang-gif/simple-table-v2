@@ -90,10 +90,18 @@ export function DataTableV2Demo() {
 
   const actionHandlers = useMemo<ActionImpl<Expense, ExpenseAction>[]>(
     () => [
+      // Tách hai chế độ: nơi gọi khai rõ `isEdit` thay vì để component đoán từ
+      // việc `record` có hay không. Sau này CREATE và EDIT khác nhau (quyền, giá
+      // trị mặc định, tiêu đề...) thì sửa độc lập được.
       {
-        // Một handler cho cả hai — `record` có thì là sửa, không có thì là tạo (§6)
-        name: ['CREATE', 'EDIT'],
-        render: ({ record, close }) => <ExpenseFormSheet record={record} close={close} />,
+        name: 'CREATE',
+        render: ({ close }) => <ExpenseFormSheet close={close} />,
+      },
+      {
+        name: 'EDIT',
+        render: ({ record, close }) => (
+          <ExpenseFormSheet isEdit record={record} close={close} />
+        ),
       },
       {
         name: 'DELETE',
