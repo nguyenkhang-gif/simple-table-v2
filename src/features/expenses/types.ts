@@ -20,6 +20,9 @@ export interface FetchExpensesParams {
   limit?: number;
   category?: ExpenseCategory;
   note?: string;
+  /** Khoảng ngày, ISO yyyy-MM-dd — filter `date` được duỗi thành hai param này */
+  dateFrom?: string;
+  dateTo?: string;
   sortBy?: string;
   sortDirection?: "asc" | "desc";
 }

@@ -1,5 +1,6 @@
 import { assertNever, cn } from '@/lib/utils'
-import type { FilterFieldDecl } from '../types'
+import type { DateRangeValue, FilterFieldDecl } from '../types'
+import { DateRangeFilter } from './DateRangeFilter'
 import { DebouncedInput } from './DebouncedInput'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
@@ -56,6 +57,17 @@ function CustomFilter({ field, value, onChange }: ControlProps) {
   return <>{field.render?.({ value, onChange })}</>
 }
 
+function DateRangeControl({ field, value, onChange, id }: ControlProps) {
+  return (
+    <DateRangeFilter
+      id={id}
+      value={value as DateRangeValue | undefined}
+      onChange={onChange}
+      presets={field.presets}
+    />
+  )
+}
+
 /**
  * Bọc nhãn + bề rộng cho mọi variant, rồi điều phối theo `variant`.
  * Bề rộng do wrapper quyết định (`field.width`), control bên trong luôn `w-full`
@@ -92,6 +104,8 @@ function renderControl(props: ControlProps) {
       return <SelectFilter {...props} />
     case 'component':
       return <CustomFilter {...props} />
+    case 'date-range':
+      return <DateRangeControl {...props} />
     default:
       return assertNever(props.field.variant, 'filter variant')
   }

@@ -21,7 +21,24 @@ export interface ColumnDef<T> {
 
 // --- Filter khai báo độc lập, tách khỏi columns ---
 
-export type FilterVariant = "text" | "select" | "component";
+export type FilterVariant = "text" | "select" | "component" | "date-range";
+
+export type DatePreset = "today" | "7d" | "30d";
+
+/**
+ * Giá trị của filter `date-range`.
+ *
+ * `preset` chỉ để UI biết mục nào đang được chọn — server không bao giờ thấy nó.
+ * Preset được quy đổi ra `from`/`to` ngay lúc bấm, nên request luôn tự mô tả đủ
+ * và queryKey đổi theo đúng khoảng ngày thật. Gửi thẳng "7d" lên server thì cùng
+ * một key sẽ trỏ sang khoảng khác vào hôm sau — cache sai.
+ */
+export interface DateRangeValue {
+  preset?: DatePreset;
+  /** ISO yyyy-MM-dd */
+  from?: string;
+  to?: string;
+}
 
 export interface FilterFieldDecl {
   /** Tên param gửi thẳng lên fetch — không cần trùng key nào trong columns */
@@ -35,6 +52,8 @@ export interface FilterFieldDecl {
   width?: string;
   /** Dùng khi variant: "select" */
   options?: { label: string; value: string }[];
+  /** Dùng khi variant: "date-range" — không khai thì hiện đủ cả ba preset */
+  presets?: DatePreset[];
   defaultValue?: unknown;
   /** Cascading — ẩn field này tuỳ theo giá trị của field khác */
   hidden?: (values: Record<string, unknown>) => boolean;

@@ -59,6 +59,13 @@ export function DataTableV2Demo() {
           { label: 'entertainment', value: 'entertainment' },
         ],
       },
+      // Một field nhưng gửi lên hai param: dateFrom + dateTo
+      {
+        key: 'date',
+        label: 'Date range',
+        variant: 'date-range',
+        width: 'w-56',
+      },
     ],
     [],
   )

@@ -16,6 +16,10 @@ app.get('/api/expenses', (req, res) => {
       category: (item, value) => item.category === value,
       note: (item, value) =>
         item.note.toLowerCase().includes(String(value).toLowerCase()),
+      // date lưu dạng ISO yyyy-MM-dd — sắp theo từ điển trùng sắp theo thời gian,
+      // nên so sánh chuỗi là đủ, không cần dựng Date
+      dateFrom: (item, value) => item.date >= String(value),
+      dateTo: (item, value) => item.date <= String(value),
     },
     sorters: {
       date: (a, b) => a.date.localeCompare(b.date),
